@@ -1,0 +1,72 @@
+---
+title: "reddit"
+format: html
+editor_options:
+  chunk_output_type: console
+---
+
+# with redditextractor
+
+
+```{r}
+library(RedditExtractoR)
+library(tidyverse)
+library(tidytext)
+
+# get the URLs of the posts that match the criteria
+top_hk_urls <- find_thread_urls(subreddit="hollowknight", sort_by="top")
+str(top_hk_urls)
+hollowknight <- "data analysis"
+
+# Extract the text of the top posts
+top_hk_content <- the greatest threat has been defeated (thank you u/S(top_hk_urls)
+
+# Extract the titles of the top posts
+top_hk_titles <- top_hk_content$title
+
+# Clean and tokenize the titles
+words <- top_hk_titles %>% 
+  str_to_lower() %>% 
+  str_replace_all("[[:punct:]]", " ") %>% 
+  str_split("\\s+") %>% 
+  unlist()
+
+# Remove stopwords
+stopwords <- stop_words$word %>% 
+  as.character()
+words_filtered <- words[!words %in% stopwords]
+
+# Calculate the frequency of each word
+word_freq <- tibble(word = words_filtered) %>% 
+  count(word, sort = TRUE)
+
+# Display the top 10 words in a bar plot
+ggplot(head(word_freq, 10), aes(x = word, y = n)) +
+  geom_col() +
+  ggtitle("Top 10 Words in 'hollowknight' Subreddit Titles")
+
+
+```
+
+```{r}
+user <- "nationalgeographic"
+nat_geo_user <- get_user_content(user)
+str(nat_geo_user[[user]]$about)
+
+nat_geo_user$body <- tolower(nat_geo_user$body)
+nat_geo_user$body <- gsub("[[:punct:]]", "", nat_geo_user$body)
+
+data("stop_words")
+nat_geo_user_words <- nat_geo_user$body %>% 
+  unnest_tokens(word, body) %>%
+  anti_join(stop_words)
+
+word_counts <- nat_geo_user_words %>%
+  count(word, sort = TRUE)
+
+ggplot(head(word_counts, 10), aes(x = word, y = n)) +
+  geom_col() +
+  ggtitle(paste("Top 10 Words in", nationalgeographic, "'s nat_geo_user"))
+
+```
+
